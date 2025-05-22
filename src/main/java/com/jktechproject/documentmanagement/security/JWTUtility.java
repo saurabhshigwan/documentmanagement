@@ -1,6 +1,7 @@
 package com.jktechproject.documentmanagement.security;
 
 import com.jktechproject.documentmanagement.repository.UserRepoRole;
+import com.jktechproject.documentmanagement.service.RedisTokenSErvice;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -18,6 +19,9 @@ public class JWTUtility {
 
     @Autowired
     private UserRepoRole userRepoRole;
+
+    @Autowired
+    private RedisTokenSErvice redisTokenSErvice;
     private final SecretKey secretKey;
 
    // private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
@@ -30,11 +34,13 @@ public class JWTUtility {
     }
 
     public String generateJWTToken(String userName){
-        return Jwts.builder().setSubject(userName).
+        String tokenGen =  Jwts.builder().setSubject(userName).
                 claim("roles", getUserRoles(userName)).
                 setIssuedAt(new Date()).
                 setExpiration(new Date(System.currentTimeMillis() + tokenTimeOut)).
                 signWith(secretKey,SignatureAlgorithm.HS256).compact();
+        redisTokenSErvice.storeToken(tokenGen, tokenTimeOut);
+        return tokenGen;
     }
 
     private Claims getParseValue(String token) {

@@ -9,6 +9,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,8 +52,9 @@ public class DocService {
         return documentRepo.save(doc);
     }
 
+    @Cacheable(value = "searchResults", key = "#query")
     public List<Document> searchDocuments(String uploadedBy, String fileType, String parsedText, String filename) {
-        return documentRepo.searchDocument(uploadedBy, fileType, parsedText, filename);
+        return documentRepo.searchDocumentNativeSQL(uploadedBy, fileType, parsedText, filename);
     }
 
     private String extractContentFromDoc(MultipartFile file) throws Exception {
