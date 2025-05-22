@@ -50,6 +50,10 @@ public class JWTTokenAuthenticator extends OncePerRequestFilter {
                     }
                 }
                 filterChain.doFilter(request, response);
+            }else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not found in Redis or expired");
+
+                return;
             }
         }else{
             filterChain.doFilter(request, response);

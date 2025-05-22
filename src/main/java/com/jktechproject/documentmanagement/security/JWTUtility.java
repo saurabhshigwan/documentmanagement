@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +21,17 @@ public class JWTUtility {
     @Autowired
     private UserRepoRole userRepoRole;
 
+
     @Autowired
-    private RedisTokenSErvice redisTokenSErvice;
+    private final RedisTokenSErvice redisTokenSErvice;
+
     private final SecretKey secretKey;
 
    // private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private final long tokenTimeOut = 3600000;
 
-    public JWTUtility() {
+    public JWTUtility(RedisTokenSErvice redisTokenSErvice) {
+        this.redisTokenSErvice = redisTokenSErvice;
         String secret = "bXktMjU2LWJpdC1zZWNyZXQtYXV0hdjghdgdgXktMTIzNA==";
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
@@ -53,6 +57,10 @@ public class JWTUtility {
             getParseValue(token);
             System.out.println("Token Validated successfully "+token);
             return true;
+        }
+        catch (ExpiredJwtException e) {
+            redisTokenSErvice.deleteToken(token);
+            System.out.println("JWT expired: " + e.getMessage());
         }
         catch (JwtException | IllegalArgumentException e)
         {

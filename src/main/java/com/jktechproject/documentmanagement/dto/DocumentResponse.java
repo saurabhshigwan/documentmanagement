@@ -1,23 +1,35 @@
-package com.jktechproject.documentmanagement.entity;
+package com.jktechproject.documentmanagement.dto;
 
 
-import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "documents")
-public class Document {
+public class DocumentResponse implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private static final long serialVersionUID = 1L;
+
+
     private Long id;
-
-    @Column(columnDefinition = "TEXT")
-    private String parsedText;
-
-    @Column(columnDefinition = "TEXT")
     private String filename;
+    private String fileType;
+    private Long fileSize;
+    private String uploadedBy;
+    private LocalDateTime uploadedDate;
+
+
+    public DocumentResponse() {}
+
+    public DocumentResponse(Long id, String filename, String fileType, Long fileSize, String uploadedBy, LocalDateTime uploadedDate) {
+        this.id = id;
+        this.filename = filename;
+        this.fileType = fileType;
+        this.fileSize = fileSize;
+        this.uploadedBy = uploadedBy;
+        this.uploadedDate = uploadedDate;
+    }
+
+
 
     public Long getId() {
         return id;
@@ -66,22 +78,5 @@ public class Document {
     public void setUploadedDate(LocalDateTime uploadedDate) {
         this.uploadedDate = uploadedDate;
     }
-
-    private String fileType;
-    private Long fileSize;
-
-    private String uploadedBy;
-
-    private LocalDateTime uploadedDate;
-
-    public String getParsedText() {
-        return parsedText;
-    }
-
-    public void setParsedText(String parsedText) {
-        this.parsedText = parsedText;
-    }
-
-
 }
 

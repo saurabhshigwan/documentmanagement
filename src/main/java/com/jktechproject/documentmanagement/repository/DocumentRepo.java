@@ -34,14 +34,15 @@ public interface DocumentRepo extends JpaRepository<Document, Long> {
     SELECT * FROM documents d
     WHERE (:uploadedBy IS NULL OR d.uploaded_by = :uploadedBy)
       AND (:fileType IS NULL OR d.file_type = :fileType)
-      AND (:parsedText IS NULL OR LOWER(CAST(d.parsed_text AS TEXT)) LIKE LOWER(CONCAT('%', :parsedText, '%')))
-      AND (:filename IS NULL OR LOWER(d.filename) LIKE LOWER(CONCAT('%', :filename, '%')))
-    """, nativeQuery = true)
+      AND (:parsedText IS NULL OR d.parsed_text ILIKE '%' || :parsedText || '%')
+      AND (:filename IS NULL OR d.filename ILIKE '%' || :filename || '%')
+""", nativeQuery = true)
     List<Document> searchDocumentNativeSQL(
             @Param("uploadedBy") String uploadedBy,
             @Param("fileType") String fileType,
             @Param("parsedText") String parsedText,
             @Param("filename") String filename
     );
+
 
 }

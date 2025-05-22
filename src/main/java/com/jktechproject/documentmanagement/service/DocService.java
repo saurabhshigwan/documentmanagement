@@ -1,5 +1,6 @@
 package com.jktechproject.documentmanagement.service;
 
+import com.jktechproject.documentmanagement.dto.DocumentResponse;
 import com.jktechproject.documentmanagement.entity.Document;
 import com.jktechproject.documentmanagement.entity.User;
 import com.jktechproject.documentmanagement.repository.DocumentRepo;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DocService {
@@ -52,9 +54,23 @@ public class DocService {
         return documentRepo.save(doc);
     }
 
-    @Cacheable(value = "searchResults", key = "#query")
-    public List<Document> searchDocuments(String uploadedBy, String fileType, String parsedText, String filename) {
-        return documentRepo.searchDocumentNativeSQL(uploadedBy, fileType, parsedText, filename);
+   @Cacheable(value = "searchResults", key = "#uploadedBy + '-' + #fileType + '-' + #parsedText + '-' + #filename")
+    public List<DocumentResponse> searchDocuments(String uploadedBy, String fileType, String parsedText, String filename) {
+        List<Document> documents = documentRepo.searchDocumentNativeSQL(uploadedBy, fileType, parsedText, filename);
+
+        return documents.stream()
+                .map(doc -> new DocumentResponse(
+                        doc.getId(),
+                        doc.getFilename(),
+                        doc.getFileType(),
+                        doc.getFileSize(),
+                        doc.getUploadedBy(),
+                        doc.getUploadedDate()
+                ))
+                .toList();
+
+
+
     }
 
     private String extractContentFromDoc(MultipartFile file) throws Exception {
